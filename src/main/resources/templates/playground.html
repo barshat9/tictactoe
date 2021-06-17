@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css"
+  />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <style>
+    *, *::after, *::before {
+  box-sizing: border-box;
+}
+
+:root {
+  --cell-size: 100px;
+  --mark-size: calc(var(--cell-size) * .9);
+}
+
+body {
+  margin: 0;
+}
+
+.joinform{
+  height: 10vh;
+  background-color: #777;
+  padding-top: 2%;
+}
+
+.board {
+  width: 100vw;
+  height: 100vh;
+  display: grid;
+  justify-content: center;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+  grid-template-columns: repeat(3, auto)
+}
+
+.cell {
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border: 1px solid black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+}
+
+.cell:first-child,
+.cell:nth-child(2),
+.cell:nth-child(3) {
+  border-top: none;
+}
+
+.cell:nth-child(3n + 1) {
+  border-left: none;
+}
+
+.cell:nth-child(3n + 3) {
+  border-right: none;
+}
+
+.cell:last-child,
+.cell:nth-child(8),
+.cell:nth-child(7) {
+  border-bottom: none;
+}
+
+.cell.x,
+.cell.circle {
+  cursor: not-allowed;
+}
+
+.cell.x::before,
+.cell.x::after,
+.cell.circle::before {
+  background-color: black;
+}
+
+.board.x .cell:not(.x):not(.circle):hover::before,
+.board.x .cell:not(.x):not(.circle):hover::after,
+.board.circle .cell:not(.x):not(.circle):hover::before {
+  background-color: lightgrey;
+}
+
+.cell.x::before,
+.cell.x::after,
+.board.x .cell:not(.x):not(.circle):hover::before,
+.board.x .cell:not(.x):not(.circle):hover::after {
+  content: '';
+  position: absolute;
+  width: calc(var(--mark-size) * .15);
+  height: var(--mark-size);
+}
+
+.cell.x::before,
+.board.x .cell:not(.x):not(.circle):hover::before {
+  transform: rotate(45deg);
+}
+
+.cell.x::after,
+.board.x .cell:not(.x):not(.circle):hover::after {
+  transform: rotate(-45deg);
+}
+
+.cell.circle::before,
+.cell.circle::after,
+.board.circle .cell:not(.x):not(.circle):hover::before,
+.board.circle .cell:not(.x):not(.circle):hover::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+
+.cell.circle::before,
+.board.circle .cell:not(.x):not(.circle):hover::before {
+  width: var(--mark-size);
+  height: var(--mark-size);
+}
+
+.cell.circle::after,
+.board.circle .cell:not(.x):not(.circle):hover::after {
+  width: calc(var(--mark-size) * .7);
+  height: calc(var(--mark-size) * .7);
+  background-color: white;
+}
+
+.winning-message {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, .9);
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-size: 5rem;
+  flex-direction: column;
+}
+
+.winning-message button {
+  font-size: 3rem;
+  background-color: white;
+  border: 1px solid black;
+  padding: .25em .5em;
+  cursor: pointer;
+}
+
+.winning-message button:hover {
+  background-color: black;
+  color: white;
+  border-color: white;
+}
+
+.winning-message.show {
+  display: flex;
+}
+  </style>
+  <title>Document</title>
+</head>
+<body>
+<div class="joinform">
+  <div>
+    <button class="btn-primary" onclick="joinGame()">Join Game</button>
+  </div>
+  <div>
+    <p id="game-status"></p>
+  </div>
+  <div>
+    <p id="game-status"></p>
+  </div>
+  <div>
+    <label id="opponent"></label>
+  </div>
+</div>
+<div class="board" id="board">
+  <div id = "0" class="cell" data-cell></div>
+  <div id = "1" class="cell" data-cell></div>
+  <div id = "2" class="cell" data-cell></div>
+  <div id = "3" class="cell" data-cell></div>
+  <div id = "4" class="cell" data-cell></div>
+  <div id = "5" class="cell" data-cell></div>
+  <div id = "6" class="cell" data-cell></div>
+  <div id = "7" class="cell" data-cell></div>
+  <div id = "8" class="cell" data-cell></div>
+</div>
+<div class="winning-message" id="winningMessage">
+  <div data-winning-message-text></div>
+  <button id="restartButton">Restart</button>
+</div>
+
+<script>
+
+let isInLobby = true;
+
+let isFirstPlayer = false;
+
+let disablePlay = true;
+
+const userID = localStorage.getItem("userID");
+
+const joinGame = async () => {
+  if (!userID) {
+    throw new Error('User ID not Set');
+  }
+  const requestBody = {
+    userID: userID
+  }
+  const rawResponse = await fetch("/game/join", {
+    method: "POST",
+    headers: {
+      'Content-Type': "application/json"
+    },
+    body: JSON.stringify(requestBody)
+  });
+  const game = await rawResponse.json();
+
+  localStorage.setItem("gameID", game.gameID);
+  isInLobby = game.status == 'IN_LOBBY';
+  console.log(`Join Game Response ${JSON.stringify(game)}`)
+  if (isInLobby) {
+    isFirstPlayer = true;
+    document.getElementById("game-status").innerHTML = "Waiting For Other Player To Join...";
+  }
+  if (!isInLobby && game.status == 'STARTED') {
+    document.getElementById("game-status").innerHTML = "Game Started";
+    const opp = game.opponent;
+    document.getElementById("opponent").innerHTML = "Your Opponent [ " +opp + " ]";
+  }
+  connect();
+};
+
+let stompClient;
+
+const connect = () => {
+  sockJS = new SockJS("/ws");
+  stompClient = Stomp.over(sockJS);
+  stompClient.connect({}, onConnected, onError);
+};
+
+const onConnected = () => {
+  const gameID = localStorage.getItem("gameID");
+  stompClient.subscribe(
+    "/game/" + gameID + "/queue/game-events",
+    onMessageReceived
+  );
+  if (!isInLobby) {
+    const payload = {
+      playerID: userID,
+      gameID: gameID,
+      eventType: 1
+    }
+    sendMessage(payload);
+  } else {
+      document.getElementById("game-status").innerHTML = "Waiting In Lobby";
+  }
+};
+
+const reconnect = () => {
+  if (!stompClient) {
+    sockJS = new SockJS("/ws");
+    stompClient = Stomp.over(sockJS);
+    stompClient.connect({}, onReConnected, onError);
+  }
+};
+
+const onReConnected = () => {
+  console.log("connected");
+  const gameID = localStorage.getItem("gameID");
+  const userID = localStorage.getItem("userID");
+  stompClient.subscribe(
+    "/game/" + gameID + "/queue/game-events",
+    onMessageReceived
+  );
+};
+
+
+const onError = (err) => {
+  console.log("Error Occurred " + err);
+  reconnect();
+}
+
+const onMessageReceived = (msg) => {
+  console.log(`Message Received ` + JSON.stringify(msg));
+  const currentUserID = localStorage.getItem("userID");
+  const payload = JSON.parse(msg.body);
+  if (payload.eventType == 1 && payload.recipient == currentUserID) {
+    togglePlay();
+    document.getElementById("game-status").innerHTML = "Game Started";
+    document.getElementById("opponent").innerHTML = "Your Opponent [ " + payload.joinedPlayerName + " ]";
+  }
+  if (payload.eventType == 2 && payload.recipient == currentUserID) {
+    togglePlay();
+    const position = payload.position;
+    const cell = document.getElementById(position);
+    const currentClass = !isFirstPlayer ? CIRCLE_CLASS : X_CLASS
+    placeMarkForOpponent(cell, currentClass);
+  }
+  if (payload.eventType == 3) {
+    disablePlay = true;
+    const youWon = payload.winnerPlayerID == currentUserID;
+    endGame(false, youWon);
+  }
+
+  if (payload.eventType == 4) {
+    endGame(true, false);
+  }
+}
+
+const sendMessage = (payload) => {
+  console.log(`Sending Message {}`, payload);
+  if (!stompClient) {
+    reconnect();
+  }
+  try {
+    stompClient.send("/app/game-controller", {}, JSON.stringify(payload));
+  } catch(err) {
+    console.log(`Error Occurred While Sending Message ${err.message}`)
+  }
+}
+
+/** Game Play**/
+
+  const X_CLASS = 'x'
+const CIRCLE_CLASS = 'circle'
+const WINNING_COMBINATIONS = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+]
+const cellElements = document.querySelectorAll('[data-cell]')
+const board = document.getElementById('board')
+const winningMessageElement = document.getElementById('winningMessage')
+const restartButton = document.getElementById('restartButton')
+const winningMessageTextElement = document.querySelector('[data-winning-message-text]')
+let circleTurn
+
+startGame()
+
+restartButton.addEventListener('click', restartGame)
+
+function togglePlay() {
+  disablePlay = !disablePlay;
+}
+
+function restartGame() {
+  isFirstPlayer = true;
+  disablePlay = true;
+  isInLobby = true;
+  document.getElementById("opponent").innerHTML = "";
+  document.getElementById("game-status").innerHTML = "";
+  startGame();
+  joinGame();
+}
+
+function startGame() {
+  circleTurn = false
+  cellElements.forEach(cell => {
+    cell.classList.remove(X_CLASS)
+    cell.classList.remove(CIRCLE_CLASS)
+    cell.removeEventListener('click', handleClick)
+    cell.addEventListener('click', handleClick, { once: true })
+  })
+  setBoardHoverClass()
+  winningMessageElement.classList.remove('show')
+}
+
+function handleClick(e) {
+  if (disablePlay) {
+    return;
+  }
+  const cell = e.target
+  console.log(cell);
+  const currentClass = isFirstPlayer ? CIRCLE_CLASS : X_CLASS
+  placeMark(cell, currentClass)
+}
+
+function endGame(draw, youWin) {
+  if (draw) {
+    winningMessageTextElement.innerText = 'Draw!'
+  } else {
+    if (youWin) {
+      winningMessageTextElement.innerText = `You Won!`
+    } else {
+      winningMessageTextElement.innerText = `You Lost!`
+    }
+  }
+  winningMessageElement.classList.add('show')
+}
+
+function isDraw() {
+  return [...cellElements].every(cell => {
+    return cell.classList.contains(X_CLASS) || cell.classList.contains(CIRCLE_CLASS)
+  })
+}
+
+function placeMarkForOpponent(cell, currentClass) {
+  cell.classList.add(currentClass);
+}
+
+function placeMark(cell, currentClass) {
+  const cellID = cell.id;
+  const rowCol = transormToRowCol(cellID);
+  const payload = {
+    gameID: localStorage.getItem("gameID"),
+    playerID: userID,
+    eventType: 2,
+    position: Number(cellID)
+  };
+  togglePlay();
+  cell.classList.add(currentClass);
+  sendMessage(payload);
+}
+
+function transormToRowCol(position) {
+  switch(position) {
+    case '0':
+      return [0, 0];
+    case '1':
+      return [0, 1];
+    case '2':
+      return [0, 2];
+    case '3':
+      return [1, 0];
+    case '4':
+      return [1, 1];
+    case '5':
+      return [1, 2];
+    case '6':
+      return [2, 0];
+    case '7':
+      return [2, 1];
+    case '8':
+      return [2, 2];
+    default:
+      return undefined;
+  }
+}
+
+function transformToPosition(row, col) {
+  if (row == 0 && col == 0) return 0;
+  if (row == 0 && col == 1) return 1;
+  if (row == 0 && col == 2) return 2;
+  if (row == 1 && col == 0) return 3;
+  if (row == 1 && col == 1) return 4;
+  if (row == 1 && col == 2) return 5;
+  if (row == 2 && col == 0) return 6;
+  if (row == 2 && col == 1) return 7;
+  if (row == 2 && col == 2) return 8;
+  return undefined;
+}
+
+function swapTurns() {
+  circleTurn = !circleTurn
+}
+
+function setBoardHoverClass() {
+  board.classList.remove(X_CLASS)
+  board.classList.remove(CIRCLE_CLASS)
+  if (circleTurn) {
+    board.classList.add(CIRCLE_CLASS)
+  } else {
+    board.classList.add(X_CLASS)
+  }
+}
+
+function checkWin(currentClass) {
+  return WINNING_COMBINATIONS.some(combination => {
+    return combination.every(index => {
+      return cellElements[index].classList.contains(currentClass)
+    })
+  })
+}
+</script>
+</body>
+</html>
