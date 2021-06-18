@@ -6,5 +6,6 @@ public enum GameStatus {
   STARTED,
   IN_PROGRESS,
   WON_LOST,
-  DRAW
+  DRAW,
+  FORFEITED
 }

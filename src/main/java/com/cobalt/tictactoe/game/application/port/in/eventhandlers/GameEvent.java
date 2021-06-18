@@ -5,4 +5,6 @@ public interface GameEvent {
   int USER_JOINED = 1;
 
   int USER_PLAYED = 2;
+
+  int USER_QUIT = 5;
 }

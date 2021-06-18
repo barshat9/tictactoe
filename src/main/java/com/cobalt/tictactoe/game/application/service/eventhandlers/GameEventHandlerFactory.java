@@ -1,5 +1,6 @@
 package com.cobalt.tictactoe.game.application.service.eventhandlers;
 
+import com.cobalt.tictactoe.game.application.port.in.GameCRUDUseCase;
 import com.cobalt.tictactoe.game.application.port.in.JoinGameUseCase;
 import com.cobalt.tictactoe.game.application.port.in.PlayGameUseCase;
 import com.cobalt.tictactoe.game.application.port.in.eventhandlers.GameEvent;
@@ -24,10 +25,13 @@ public class GameEventHandlerFactory {
 
   private final UserRepository userRepository;
 
+  private final GameCRUDUseCase gameCRUDUseCase;
+
   @PostConstruct
   public void init() {
     handlers.put(UserJoinedEventHandler.class, userJoinedEventHandler());
     handlers.put(UserPlayedEventHandler.class, userPlayedEventHandler());
+    handlers.put(UserQuitEventHandler.class, userQuitEventHandler());
   }
 
   public GameEventHandler gameEventHandler(int eventType) {
@@ -36,6 +40,8 @@ public class GameEventHandlerFactory {
         return handlers.get(UserJoinedEventHandler.class);
       case GameEvent.USER_PLAYED:
         return handlers.get(UserPlayedEventHandler.class);
+      case GameEvent.USER_QUIT:
+        return handlers.get(UserQuitEventHandler.class);
       default:
         return null;
     }
@@ -49,5 +55,10 @@ public class GameEventHandlerFactory {
   @Bean
   UserPlayedEventHandler userPlayedEventHandler() {
     return new UserPlayedEventHandler(playGameUseCase);
+  }
+
+  @Bean
+  UserQuitEventHandler userQuitEventHandler() {
+    return new UserQuitEventHandler(gameCRUDUseCase);
   }
 }

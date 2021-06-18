@@ -70,6 +70,7 @@
           }).then(res => res.json()).then(json => {
             const userID = json.id;
             localStorage.setItem("userID", userID);
+            document.cookie = "userid=" + userID;
             window.location.replace("/playground")
           })
         });

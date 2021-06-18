@@ -245,7 +245,7 @@ let stompClient;
 const connect = () => {
   sockJS = new SockJS("/ws");
   stompClient = Stomp.over(sockJS);
-  stompClient.connect({}, onConnected, onError);
+  stompClient.connect({userid: userID}, onConnected, onError);
 };
 
 const onConnected = () => {
@@ -309,11 +309,15 @@ const onMessageReceived = (msg) => {
   if (payload.eventType == 3) {
     disablePlay = true;
     const youWon = payload.winnerPlayerID == currentUserID;
-    endGame(false, youWon);
+    endGame(false, youWon, false);
   }
 
   if (payload.eventType == 4) {
-    endGame(true, false);
+    endGame(true, false, false);
+  }
+
+  if (payload.eventType == 5 && payload.recipient == currentUserID) {
+    endGame(false, false, true);
   }
 }
 
@@ -390,17 +394,30 @@ function handleClick(e) {
   placeMark(cell, currentClass)
 }
 
-function endGame(draw, youWin) {
-  if (draw) {
-    winningMessageTextElement.innerText = 'Draw!'
-  } else {
-    if (youWin) {
-      winningMessageTextElement.innerText = `You Won!`
-    } else {
-      winningMessageTextElement.innerText = `You Lost!`
-    }
+function endGame(draw, youWin, quit) {
+  console.log(`Ending Game ${draw} ${youWin} ${quit}`)
+  if (quit) {
+    winningMessageTextElement.innerText = 'Player Quit, You Won!';
+    winningMessageElement.classList.add('show')
+    return;
   }
-  winningMessageElement.classList.add('show')
+  if (draw) {
+    winningMessageTextElement.innerText = 'Draw!';
+    winningMessageElement.classList.add('show')
+    return;
+  } 
+  if (youWin) {
+      winningMessageTextElement.innerText = `You Won!`;
+      winningMessageElement.classList.add('show')
+      return;
+  } 
+  if (!youWin) {
+      winningMessageTextElement.innerText = `You Lost!`;
+      winningMessageElement.classList.add('show')
+      return
+  }
+ 
+  
 }
 
 function isDraw() {

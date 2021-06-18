@@ -11,14 +11,13 @@ public class Game {
 
   @Getter private Long firstPlayer;
 
-  @Getter @Setter
-  private Long secondPlayer;
+  @Getter @Setter private Long secondPlayer;
 
   private GameStatus status;
 
-  @Getter private Long winnerPlayerID;
+  @Getter @Setter private Long winnerPlayerID;
 
-  @Getter private Long loserPlayerID;
+  @Getter @Setter private Long loserPlayerID;
 
   Game(Long firstPlayer) {
     this.firstPlayer = firstPlayer;
@@ -55,6 +54,10 @@ public class Game {
 
   public void inProgress() {
     this.status = GameStatus.IN_PROGRESS;
+  }
+
+  public void quit() {
+    this.status = GameStatus.FORFEITED;
   }
 
   public static byte symbolFor(Long playerID) {
