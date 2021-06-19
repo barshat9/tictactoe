@@ -1,6 +1,7 @@
 package com.cobalt.tictactoe.game.adapter.out.persistence;
 
 import com.cobalt.tictactoe.game.domain.GameStatus;
+import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,6 +10,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -39,6 +42,14 @@ public class GameEntity {
 
   @Column(name = "loser")
   private Long loserPlayerID;
+
+  @Column(name = "created_date")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date createdDate;
+
+  @Column(name = "completion_date")
+  @Temporal(TemporalType.TIMESTAMP)
+  private Date completionDate;
 
   private byte b0;
 

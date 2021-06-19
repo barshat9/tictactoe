@@ -2,6 +2,7 @@ package com.cobalt.tictactoe.game.adapter.out.persistence;
 
 import com.cobalt.tictactoe.game.application.port.out.GameCRUDPort;
 import com.cobalt.tictactoe.game.domain.Game;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -33,5 +34,10 @@ public class GamePersistenceAdapter implements GameCRUDPort {
   @Override
   public Optional<Game> findByPlayerID(Long playerID) {
     return gameJPARepository.findByPlayerID(playerID).map(mapper::mapToSource);
+  }
+
+  @Override
+  public List<Game> findAllGamesByPlayerID(Long playerID) {
+    return mapper.mapToSource(gameJPARepository.findAllGamesByPlayerID(playerID));
   }
 }

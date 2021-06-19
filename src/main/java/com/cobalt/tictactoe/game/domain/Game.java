@@ -33,6 +33,13 @@ public class Game {
     this.status = status;
   }
 
+  public static Game forTesting(Long id, Long firstPlayer, Long secondPlayer, Long loserPlayerID, Long winnerPlayerID, GameStatus status) {
+    var game = new Game(id, firstPlayer, secondPlayer, null, status);
+    game.setWinnerPlayerID(winnerPlayerID);
+    game.setLoserPlayerID(loserPlayerID);
+    return game;
+  }
+
   public GameStatus makeMove(Long playerID, int index) {
     byte playerSymbol = symbolFor(playerID);
     board.placeMark(playerSymbol, index);

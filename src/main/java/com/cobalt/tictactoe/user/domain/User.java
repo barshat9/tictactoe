@@ -31,4 +31,8 @@ public class User {
   private String lastName;
 
   private String password;
+
+  public String fullName() {
+    return firstName + " " + lastName;
+  }
 }

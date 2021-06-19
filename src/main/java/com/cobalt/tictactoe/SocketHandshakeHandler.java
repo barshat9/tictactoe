@@ -37,7 +37,6 @@ public class SocketHandshakeHandler extends DefaultHandshakeHandler {
     var cookies = getCookies(cookieString);
     CustomPrincipal principal = new CustomPrincipal();
     principal.setUserID(cookies.get("userid"));
-    ;
     return principal;
   }
 

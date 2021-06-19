@@ -229,11 +229,12 @@ const joinGame = async () => {
   isInLobby = game.status == 'IN_LOBBY';
   console.log(`Join Game Response ${JSON.stringify(game)}`)
   if (isInLobby) {
+    console.log(`Setting FirstPlayer Is TRUE`);
     isFirstPlayer = true;
     document.getElementById("game-status").innerHTML = "Waiting For Other Player To Join...";
   }
   if (!isInLobby && game.status == 'STARTED') {
-    document.getElementById("game-status").innerHTML = "Game Started";
+    document.getElementById("game-status").innerHTML = "Game Started, Your Symbol Is X";
     const opp = game.opponent;
     document.getElementById("opponent").innerHTML = "Your Opponent [ " +opp + " ]";
   }
@@ -284,7 +285,6 @@ const onReConnected = () => {
   );
 };
 
-
 const onError = (err) => {
   console.log("Error Occurred " + err);
   reconnect();
@@ -296,7 +296,7 @@ const onMessageReceived = (msg) => {
   const payload = JSON.parse(msg.body);
   if (payload.eventType == 1 && payload.recipient == currentUserID) {
     togglePlay();
-    document.getElementById("game-status").innerHTML = "Game Started";
+    document.getElementById("game-status").innerHTML = "Game Started, Your Symbol Is Circle";
     document.getElementById("opponent").innerHTML = "Your Opponent [ " + payload.joinedPlayerName + " ]";
   }
   if (payload.eventType == 2 && payload.recipient == currentUserID) {
@@ -363,7 +363,7 @@ function togglePlay() {
 }
 
 function restartGame() {
-  isFirstPlayer = true;
+  isFirstPlayer = false;
   disablePlay = true;
   isInLobby = true;
   document.getElementById("opponent").innerHTML = "";
@@ -389,7 +389,7 @@ function handleClick(e) {
     return;
   }
   const cell = e.target
-  console.log(cell);
+  console.log(`Clicked Cell ${cell}`);
   const currentClass = isFirstPlayer ? CIRCLE_CLASS : X_CLASS
   placeMark(cell, currentClass)
 }

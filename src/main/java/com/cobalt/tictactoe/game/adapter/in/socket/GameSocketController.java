@@ -3,7 +3,6 @@ package com.cobalt.tictactoe.game.adapter.in.socket;
 import com.cobalt.tictactoe.game.application.port.in.GameCRUDUseCase;
 import com.cobalt.tictactoe.game.application.port.in.eventhandlers.GameEventCommand;
 import com.cobalt.tictactoe.game.application.service.eventhandlers.GameEventHandlerFactory;
-import com.cobalt.tictactoe.user.domain.UserRepository;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;

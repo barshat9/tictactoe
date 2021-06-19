@@ -4,6 +4,7 @@ import com.cobalt.tictactoe.common.annotations.UseCase;
 import com.cobalt.tictactoe.game.application.port.in.GameCRUDUseCase;
 import com.cobalt.tictactoe.game.application.port.out.GameCRUDPort;
 import com.cobalt.tictactoe.game.domain.Game;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 
@@ -31,5 +32,10 @@ public class GameCRUDService implements GameCRUDUseCase {
   @Override
   public Optional<Game> findByPlayer(Long playerID) {
     return gameCRUDPort.findByPlayerID(playerID);
+  }
+
+  @Override
+  public List<Game> findAllGamesByPlayer(Long playerID) {
+    return gameCRUDPort.findAllGamesByPlayerID(playerID);
   }
 }
