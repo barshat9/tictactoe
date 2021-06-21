@@ -1,0 +1,62 @@
+<html>
+  <head>
+    <title>Your Dashboard</title>
+    <style>
+      table, th, td {
+        border: 1px solid black;  
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Game History</h3>
+    <div>
+      <table id= "gameHistory" style="width:90%">
+          <tr>
+            <th>Game ID</th>
+            <th>First Player</th>
+            <th>Second Player</th>
+            <th>Time Taken</th>
+            <th>Winner</th>
+          </tr>
+          <!-- <tr>
+            <td>1</td>
+            <td>John Doe</td>
+            <td>Jane Doe</td>
+            <td>1.45</td>
+            <td>Jane Doe</td>
+          </tr> -->
+      </table>
+    </div>
+    <script>
+
+      const getGameHistory = async () => {
+        const userID = localStorage.getItem('userID');
+        const resp = await fetch(`/users/${userID}/games`);
+        return await resp.json();
+      }
+
+      document.addEventListener("DOMContentLoaded", (e) => {
+        const loadHistory = async  () => {
+        let table = document.getElementById("gameHistory");
+        const gameHistories = await getGameHistory();
+        let count = 1;
+        gameHistories.forEach(gh => {
+          var row = table.insertRow(count);
+          var gameID = row.insertCell(0);
+          var firstPlayer = row.insertCell(1);
+          var secondPlayer = row.insertCell(2);
+          var timeTaken = row.insertCell(3);
+          var winner = row.insertCell(4);
+          gameID.innerHTML = gh.id;
+          firstPlayer.innerHTML = gh.firstPlayerName;
+          secondPlayer.innerHTML = gh.secondPlayerName;
+          timeTaken.innerHTML = gh.gameTimeInSeconds;
+          winner.innerHTML = gh.status;
+        })
+  
+      }
+      loadHistory();
+      })
+    </script>
+  </body>
+</html>

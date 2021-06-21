@@ -38,6 +38,7 @@ public class GameEntityModelMapper extends ModelMapper<Game, GameEntity> {
             .id(entity.getId())
             .firstPlayer(entity.getFirstPlayer())
             .secondPlayer(entity.getSecondPlayer())
+            .withWinnerPlayerID(entity.getWinnerPlayerID())
             .status(entity.getStatus())
             .withSymbolPositions(
                 new byte[] {

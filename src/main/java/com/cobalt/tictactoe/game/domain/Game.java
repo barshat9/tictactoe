@@ -25,16 +25,17 @@ public class Game {
     status = GameStatus.IN_LOBBY;
   }
 
-  Game(Long id, Long firstPlayer, Long secondPlayer, Board board, GameStatus status) {
+  Game(Long id, Long firstPlayer, Long secondPlayer, Long winner, Board board, GameStatus status) {
     this.id = id;
     this.firstPlayer = firstPlayer;
     this.secondPlayer = secondPlayer;
     this.board = board;
     this.status = status;
+    this.winnerPlayerID = winner;
   }
 
   public static Game forTesting(Long id, Long firstPlayer, Long secondPlayer, Long loserPlayerID, Long winnerPlayerID, GameStatus status) {
-    var game = new Game(id, firstPlayer, secondPlayer, null, status);
+    var game = new Game(id, firstPlayer, secondPlayer, null, null,  status);
     game.setWinnerPlayerID(winnerPlayerID);
     game.setLoserPlayerID(loserPlayerID);
     return game;

@@ -2,12 +2,15 @@ package com.cobalt.tictactoe;
 
 import com.cobalt.tictactoe.user.domain.User;
 import com.cobalt.tictactoe.user.domain.UserRepository;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Profile;
 
 @SpringBootApplication
 @EnableAspectJAutoProxy
@@ -16,9 +19,17 @@ public class Tictactoe2Application {
 
   public static void main(String[] args) {
     SpringApplication.run(Tictactoe2Application.class, args);
-  }
+  }//  @Bean
+//  DataSource dataSource() {
+//    DataSourceBuilder builder = DataSourceBuilder.create();
+//    builder.driverClassName("")
+//  }
+
+
+
 
   @Bean
+  @Profile("!prod")
   CommandLineRunner run(final UserRepository userRepository) {
     return args -> {
       var user1 =

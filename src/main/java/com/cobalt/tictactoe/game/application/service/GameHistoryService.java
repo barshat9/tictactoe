@@ -12,9 +12,11 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @UseCase
 @RequiredArgsConstructor
+@Slf4j
 public class GameHistoryService implements GameHistoryUseCase {
 
   private final GameCRUDUseCase gameCRUDUseCase;
@@ -67,6 +69,7 @@ public class GameHistoryService implements GameHistoryUseCase {
   }
 
   Function<Map<String, Object>, Map<String, Object>> determineStatus(Long forPlayerID) {
+    log.info("Determining Status For Player {}", forPlayerID);
     return map -> {
       Game game = (Game) map.get("game");
       String status = "NA";

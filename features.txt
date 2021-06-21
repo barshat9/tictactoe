@@ -1,3 +1,5 @@
 1. Handle User Quit Event.
 
 2. Get User Game History.
+
+3. Add Timer To The Game

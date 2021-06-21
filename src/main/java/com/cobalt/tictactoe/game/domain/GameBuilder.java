@@ -24,6 +24,8 @@ public class GameBuilder {
 
     private Long secondPlayer;
 
+    private Long winnerPlayerID;
+
     private GameStatus status;
 
     private byte[] symbolPositions;
@@ -53,6 +55,11 @@ public class GameBuilder {
       return this;
     }
 
+    public ExistingGameBuilder withWinnerPlayerID(Long winnerPlayerID) {
+      this.winnerPlayerID = winnerPlayerID;
+      return this;
+    }
+
     public Game build() {
       Board board = new Board();
       int position = 0;
@@ -60,7 +67,7 @@ public class GameBuilder {
         board.placeMark(symbol, position);
         position++;
       }
-      return new Game(id, firstPlayer, secondPlayer, board, status);
+      return new Game(id, firstPlayer, secondPlayer, winnerPlayerID, board, status);
     }
   }
 

@@ -15,4 +15,9 @@ public class IndexController {
   public String playground() {
     return "playground";
   }
+
+  @GetMapping("/dashboard")
+  public String dashboard() {
+    return "dashboard";
+  }
 }
