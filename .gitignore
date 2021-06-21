@@ -1,4 +1,4 @@
-./src/main/resources/application-prod.properties
+src/main/resources/application-prod.properties
 HELP.md
 .gradle
 build/
